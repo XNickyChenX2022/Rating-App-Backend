@@ -1,3 +1,5 @@
+import dotenv from "dotenv";
+dotenv.config();
 import redis from "redis";
 import maintainTokens from "../utils/maintainAccessToken.js";
 const connectRedis = async () => {
