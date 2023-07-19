@@ -44,6 +44,7 @@ import Game from "../models/gameModel.js";
 
 const createGames = asyncHandler(async (req, res) => {
   const id = req.body.id;
+  console.log("creating new games");
   const response = await fetch(`https://api.igdb.com/v4/games`, {
     method: "POST",
     headers: {
@@ -76,7 +77,7 @@ const createGames = asyncHandler(async (req, res) => {
 
 const updateGames = asyncHandler(async (req, res) => {
   const { id } = req.body;
-  console.log({ id });
+  console.log("updating games");
   const response = await fetch(`https://api.igdb.com/v4/games`, {
     method: "POST",
     headers: {
@@ -87,7 +88,6 @@ const updateGames = asyncHandler(async (req, res) => {
     body: `fields name, cover.image_id, platforms.name, category, remakes.name, remasters.name, dlcs.name, expansions.name, involved_companies.company.name; where category = (0) & version_parent = null & cover.image_id != null & involved_companies.company.name != null & id=${id};  `,
   });
   const games = await response.json();
-  console.log(games);
   if (games.length == 0) {
     res.status(200).send("OK");
   } else {
