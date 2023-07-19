@@ -4,7 +4,7 @@ import redis from "redis";
 import maintainTokens from "../utils/maintainAccessToken.js";
 const connectRedis = async () => {
   const redisClient = redis.createClient({
-    url: process.env.url,
+    url: process.env.URL,
   });
   // Connect to redis server
   console.log("connecting");
