@@ -1,6 +1,7 @@
 import asyncHandler from "express-async-handler";
 
 const registerWebhook = asyncHandler(async (req, res) => {
+    console.log(process.env.WEBHOOK_URL + "/api/webhook/create");
     try {
       const response = await fetch("https://api.igdb.com/v4/games/webhooks/", {
         method: "POST",
@@ -13,7 +14,7 @@ const registerWebhook = asyncHandler(async (req, res) => {
           url: process.env.WEBHOOK_URL + "/api/webhook/create",
           secret: process.env.WEBHOOK_SECRET,
           method: "create",
-        }),
+        }).toString(),
       });
       const data = await response.json();
       // console.log(data);
