@@ -25,10 +25,10 @@ const registerWebhook = asyncHandler(async (req, res) => {
 });
 
 const createGames = asyncHandler(async (req, res) => {
-    const data = req.body;
-    console.log(data);
-  console.log("working");
-  res.status(200).send("working");
+  const data = req.body;
+  //     console.log(data);
+  //   console.log("working");
+  res.status(200).send("OK");
 });
 
 export { registerWebhook, createGames };
