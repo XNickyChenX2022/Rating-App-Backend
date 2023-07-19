@@ -2,12 +2,9 @@ export default class maintainTokens {
   constructor(redisClient) {
     this.redisClient = redisClient;
     this.maintainToken();
-    setInterval(
-      () => {
-        this.maintainToken();
-      },
-      15 * 60 * 1000
-    );
+    setInterval(() => {
+      this.maintainToken();
+    }, 10 * 60 * 1000);
   }
 
   async maintainToken() {

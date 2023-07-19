@@ -6,6 +6,6 @@ import {
 } from "../controllers/webhookController.js";
 
 router.post("/", registerWebhook);
-router.post("/create", createGames);
+router.get("/create", createGames);
 
 export default router;
