@@ -1,5 +1,5 @@
 import asyncHandler from "express-async-handler";
-
+import Game from "../models/gameModel.js";
 const registerWebhook = asyncHandler(async (req, res) => {
   try {
     const response = await fetch("https://api.igdb.com/v4/games/webhooks/", {
@@ -25,10 +25,35 @@ const registerWebhook = asyncHandler(async (req, res) => {
 });
 
 const createGames = asyncHandler(async (req, res) => {
-  const data = req.body;
-      console.log(data);
-      console.log("working");
-  res.status(200).send("OK");
+  const id = req.body.id;
+  const response = await fetch(`https://api.igdb.com/v4/games`, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Client-ID": process.env.CLIENT_ID,
+      Authorization: "Bearer " + process.env.access_token,
+    },
+    body: `fields name, cover.image_id, platforms.name, category, remakes.name, remasters.name, dlcs.name, expansions.name, involved_companies.company.name; where category = (0) & version_parent = null & cover.image_id != null & involved_companies.company.name != null & id=${id};  `,
+  });
+  const games = await response.json();
+  console.log(games);
+  if (games.length == 0) {
+    res.status(200).send("OK");
+  } else {
+    const game = games[0];
+    await Game.create({
+      id: game.id,
+      cover: game.cover,
+      dlcs: game.dlcs,
+      expansions: game.expansions,
+      involved_companies: game.involved_companies,
+      name: game.name,
+      platforms: game.platforms,
+      remakes: game.remakes,
+      remasters: game.remasters,
+    });
+    res.status(200).send("OK");
+  }
 });
 
 export { registerWebhook, createGames };
