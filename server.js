@@ -8,10 +8,12 @@ import cookieParser from "cookie-parser";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 import connectDB from "./config/db.js";
 import connectRedis from "./config/client.js";
+import registerWebhooks from "./config/webhook.js";
 const port = process.env.PORT || 5000;
 
 connectDB();
 connectRedis();
+registerWebhooks();
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -20,6 +22,10 @@ app.use("/api/users", userRoutes);
 app.use("/api/webhooks", webhookRoutes);
 app.use("/api/search", searchRoutes);
 // app.use("/api/users/games", userGameRoutes);
+
+
+
+
 // async function sleep(millis) {
 //     return new Promise(resolve => setTimeout(resolve, millis));
 // }
