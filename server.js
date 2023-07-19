@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import userRoutes from "./routes/userRoutes.js";
+import webhookRoutes from "./routes/webhookRoutes.js";
 // import searchRoutes from "./routes/searchRoutes.js";
 // import Game from "./models/gameModel.js";
 dotenv.config();
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use("/api/users", userRoutes);
+app.use(`${process.env.WEBHOOK_URL}`, webhookRoutes);
 // app.use("/api/search", searchRoutes);
 // app.use("/api/users/games", userGameRoutes);
 // async function sleep(millis) {
