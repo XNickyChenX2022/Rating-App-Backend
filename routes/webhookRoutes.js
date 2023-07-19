@@ -1,5 +1,5 @@
 import express from "express";
-router = express.Router();
+const router = express.Router();
 import {
   registerWebhook,
   createGames,
