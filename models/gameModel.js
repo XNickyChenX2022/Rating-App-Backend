@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const GameSchema = mongoose.Schema({
+const GameSchema = new mongoose.Schema({
   _id: { type: Number },
   cover: {
     id: Number,

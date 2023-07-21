@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
-const userSchema = mongoose.Schema(
+const userSchema = new mongoose.Schema(
   {
     username: {
       type: String,
@@ -16,21 +16,7 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    gameRatings: [
-      {
-        game: {
-          type: mongoose.Schema.Types.ObjectId,
-          required: true,
-          ref: "Game",
-        },
-        rating: {
-          type: Number,
-        },
-        comment: {
-          type: String,
-        },
-      },
-    ],
+    gameRatings: [{ type: mongoose.Schema.Types.ObjectId, ref: "GameRating" }],
   },
   {
     timestamps: true,
@@ -43,7 +29,6 @@ userSchema.pre("save", async function (next) {
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
-
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
