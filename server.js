@@ -2,13 +2,14 @@ import express from "express";
 import dotenv from "dotenv";
 import userRoutes from "./routes/userRoutes.js";
 import webhookRoutes from "./routes/webhookRoutes.js";
-import searchRoutes from "./routes/searchRoutes.js";
-dotenv.config();
+import gameRoutes from "./routes/gameRoutes.js";
 import cookieParser from "cookie-parser";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 import connectDB from "./config/db.js";
 import connectRedis from "./config/client.js";
 import registerWebhooks from "./config/webhook.js";
+import Game from "./models/gameModel.js";
+dotenv.config();
 const port = process.env.PORT || 5000;
 
 connectDB();
@@ -20,14 +21,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use("/api/users", userRoutes);
 app.use("/api/webhooks", webhookRoutes);
-app.use("/api/search", searchRoutes);
-// app.use("/api/users/games", userGameRoutes);
-
-
-
+app.use("/api/games", gameRoutes);
 
 // async function sleep(millis) {
-//     return new Promise(resolve => setTimeout(resolve, millis));
+//   return new Promise((resolve) => setTimeout(resolve, millis));
 // }
 
 // async function get(i) {
@@ -39,14 +36,14 @@ app.use("/api/search", searchRoutes);
 //         "Client-ID": process.env.CLIENT_ID,
 //         Authorization: "Bearer " + process.env.access_token,
 //       },
-//       body: `fields name, cover.image_id, platforms.name, category, remakes.name, remasters.name, dlcs.name, expansions.name, involved_companies.company.name; where category = (0) & version_parent = null & name!= null & cover.image_id != null;
+//       body: `fields name, cover.image_id, platforms.name, category, remakes.name, remasters.name, dlcs.name, expansions.name, involved_companies.company.name, involved_companies.publisher, involved_companies.developer;  where category = (0) & version_parent = null & cover.image_id != null & involved_companies.company.name != null; 
 //   offset ${i}; limit 500;`,
 //     });
 //     const games = await response.json();
 //     console.log(i);
 //     games.map(async (game) => {
 //       await Game.create({
-//         id: game.id,
+//         _id: game.id,
 //         cover: game.cover,
 //         dlcs: game.dlcs,
 //         expansions: game.expansions,
@@ -62,7 +59,7 @@ app.use("/api/search", searchRoutes);
 //   }
 // }
 // async function loop() {
-//   for (let i = 0; i < 150554; i += 500) {
+//   for (let i = 0; i < 78432; i += 500) {
 //     await sleep(10000);
 //     await get(i);
 //   }

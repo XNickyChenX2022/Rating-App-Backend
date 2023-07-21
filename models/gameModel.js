@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const GameSchema = mongoose.Schema({
-  id: { type: Number },
+  _id: { type: Number },
   cover: {
     id: Number,
     image_id: String,
@@ -25,6 +25,8 @@ const GameSchema = mongoose.Schema({
         id: Number,
         name: String,
       },
+      developer: Boolean,
+      publisher: Boolean,
     },
   ],
   name: String,
@@ -47,6 +49,6 @@ const GameSchema = mongoose.Schema({
     },
   ],
 });
-
+GameSchema.index({ name: 1 });
 const Game = mongoose.model("Game", GameSchema);
 export default Game;

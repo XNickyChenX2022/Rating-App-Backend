@@ -16,6 +16,21 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    gameRatings: [
+      {
+        game: {
+          type: mongoose.Schema.Types.ObjectId,
+          required: true,
+          ref: "Game",
+        },
+        rating: {
+          type: Number,
+        },
+        comment: {
+          type: String,
+        },
+      },
+    ],
   },
   {
     timestamps: true,

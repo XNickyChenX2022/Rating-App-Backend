@@ -13,8 +13,8 @@ const webhooks = async (type) => {
         method: type,
       }).toString(),
     });
-    const data = await response.json();
-    console.log(data);
+    // const data = await response.json();
+    console.log(`initialized ${type} webhook`);
   } catch (error) {
     console.log(error);
   }
