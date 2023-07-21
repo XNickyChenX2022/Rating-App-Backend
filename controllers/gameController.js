@@ -57,7 +57,6 @@ const removeGame = asyncHandler(async (req, res) => {
     const { _id } = req.body;
     const user = await User.findById(req.user._id);
     const gameRating = await GameRating.findOne({ game: _id, user: user.id });
-    console.log(gameRating);
     if (gameRating == null) {
       res.status(404);
       throw new Error("game not found");
@@ -67,7 +66,6 @@ const removeGame = asyncHandler(async (req, res) => {
       { _id: user.id },
       { $pull: { gameRatings: gameRating.id } }
     );
-
     res.status(200).send("Deleted Game");
   } catch (error) {
     res.status(401);
@@ -75,19 +73,70 @@ const removeGame = asyncHandler(async (req, res) => {
   }
 });
 
-//@desc   Remove game to ones collection
-//@route  POST /api/games/rate
-//@access Private
-const rateGame = asyncHandler(async (req, res) => {});
+// @desc   Get one game one's collection
+// @route  GET /api/games/:_id
+// @access Private
+const getGame = asyncHandler(async (req, res) => {
+  const { _id } = req.params;
+  const userId = new mongoose.Types.ObjectId(req.user._id);
+  const gameRating = await GameRating.findOne({
+    game: _id,
+    user: userId,
+  }).populate("game");
+  if (!gameRating) {
+    res.status(404);
+    throw new Error("Game has not been added to collection");
+  }
+  res.status(200).json(gameRating);
+  // const user = await User.findById(req.user._id);
+});
 
-//@desc   Remove game to ones collection
+//@desc   Get all games from one's collection
+//@route  GET /api/games
+//@access Private
+const getAllGames = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id).populate({
+    path: "gameRatings",
+    populate: {
+      path: "game",
+      model: "Game",
+    },
+  });
+  if (user == null) {
+    res.status(404);
+    throw new Error("User not found");
+  }
+  res.status(200).json(user);
+});
+//@desc   Rate game to ones collection
 //@route  PUT /api/games/rate
 //@access Private
-const updateRating = asyncHandler(async (req, res) => {});
+const rateGame = asyncHandler(async (req, res) => {
+  try {
+    const { _id } = req.body;
+    const { rating } = req.body;
+    const userId = new mongoose.Types.ObjectId(req.user._id);
+    const gameRating = await GameRating.findOne({ game: _id, user: userId });
+    gameRating.rating = rating;
+    await gameRating.save();
+    res.status(200).send(gameRating);
+  } catch (error) {
+    res.status(400);
+    throw new Error(`not valid rating`);
+  }
+});
 
 //@desc   Remove game to ones collection
-//@route  POST /api/games/comment
+//@route  PUT /api/games/comment
 //@access Private
 const commentGame = asyncHandler(async (req, res) => {});
 
-export { searchGames, addGame, removeGame, rateGame, commentGame };
+export {
+  searchGames,
+  addGame,
+  removeGame,
+  getGame,
+  getAllGames,
+  rateGame,
+  commentGame,
+};

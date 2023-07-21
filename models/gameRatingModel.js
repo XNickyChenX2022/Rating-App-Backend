@@ -13,9 +13,13 @@ const gameRatingSchema = new mongoose.Schema({
   },
   rating: {
     type: Number,
+    default: null,
+    min: 0,
+    max: 10,
   },
   comment: {
     type: String,
+    default: "",
   },
 });
 gameRatingSchema.index({ user: 1 });

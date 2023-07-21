@@ -3,14 +3,21 @@ const router = express.Router();
 import {
   searchGames,
   addGame,
-  rateGame,
   removeGame,
+  getGame,
+  getAllGames,
+  rateGame,
   commentGame,
 } from "../controllers/gameController.js";
 import { protect } from "../middleware/authMiddleware.js";
 router.post("/search", protect, searchGames);
-router.route("/").post(protect, addGame).delete(protect, removeGame);
-router.post("/rate", protect, rateGame);
-router.post("/comment", protect, commentGame);
+router.get("/:_id", protect, getGame);
+router
+  .route("/")
+  .get(protect, getAllGames)
+  .post(protect, addGame)
+  .delete(protect, removeGame);
+router.put("/rate", protect, rateGame);
+router.put("/comment", protect, commentGame);
 
 export default router;
