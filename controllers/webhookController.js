@@ -61,7 +61,7 @@ const createGames = asyncHandler(async (req, res) => {
     console.log("creating new games");
     const game = games[0];
     await Game.create({
-      id: game.id,
+      _id: game.id,
       cover: game.cover,
       dlcs: game.dlcs,
       expansions: game.expansions,
