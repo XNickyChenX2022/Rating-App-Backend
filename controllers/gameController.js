@@ -27,6 +27,10 @@ const searchGames = asyncHandler(async (req, res) => {
 const addGame = asyncHandler(async (req, res) => {
   try {
     const { _id } = req.body;
+    if (!_id) {
+      res.status(404);
+      throw new Error("Not valid game");
+    }
     const user = await User.findById(req.user._id);
     const checkgameRating = await GameRating.findOne({
       user: user._id,
@@ -37,14 +41,19 @@ const addGame = asyncHandler(async (req, res) => {
       throw new Error(`Game has already been added ${checkgameRating}`);
     }
     const gameRating = await GameRating.create({
-      user: user._id,
       game: _id,
+      user: user._id,
     });
+    await gameRating.save();
     user.gameRatings.push(gameRating._id);
     await user.save();
-    res.status(200).send("added game");
+    // const gamedata = gameRating.populate("game");
+    // console.log(gameRating);
+    await GameRating.populate(gameRating, "game");
+    res.status(200).json(gameRating);
   } catch (error) {
     res.status(401);
+    console.log(error);
     throw new Error("Unable to add game");
   }
 });
@@ -66,7 +75,7 @@ const removeGame = asyncHandler(async (req, res) => {
       { _id: user.id },
       { $pull: { gameRatings: gameRating.id } }
     );
-    res.status(200).send("Deleted Game");
+    res.status(200).send({ _id });
   } catch (error) {
     res.status(401);
     throw new Error(`Unable to delete added game ${error}`);
@@ -106,7 +115,8 @@ const getAllGames = asyncHandler(async (req, res) => {
     res.status(404);
     throw new Error("User not found");
   }
-  res.status(200).json(user);
+  console.log("getting All Games");
+  res.status(200).json(user.gameRatings);
 });
 //@desc   Rate game to ones collection
 //@route  PUT /api/games/rate
@@ -129,7 +139,20 @@ const rateGame = asyncHandler(async (req, res) => {
 //@desc   Remove game to ones collection
 //@route  PUT /api/games/comment
 //@access Private
-const commentGame = asyncHandler(async (req, res) => {});
+const commentGame = asyncHandler(async (req, res) => {
+  try {
+    const { _id } = req.body;
+    const { comment } = req.body;
+    const userId = new mongoose.Types.ObjectId(req.user._id);
+    const gameRating = await GameRating.findOne({ game: _id, user: userId });
+    gameRating.comment = rating;
+    await gameRating.save();
+    res.status(200).send(gameRating);
+  } catch (error) {
+    res.status(400);
+    throw new Error(`not valid rating`);
+  }
+});
 
 export {
   searchGames,
