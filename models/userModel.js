@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    gameRatings: [{ type: mongoose.Schema.Types.ObjectId, ref: "GameRating" }],
+    gameReviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "GameReview" }],
   },
   {
     timestamps: true,

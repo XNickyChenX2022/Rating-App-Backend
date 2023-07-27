@@ -1,7 +1,7 @@
 import asyncHandler from "express-async-handler";
 import Game from "../models/gameModel.js";
 import User from "../models/userModel.js";
-import GameRating from "../models/gameRatingModel.js";
+import GameReview from "../models/gameReviewModel.js";
 import mongoose from "mongoose";
 //@desc   Search database for games
 //@route  POST /api/games/search
@@ -10,10 +10,11 @@ const searchGames = asyncHandler(async (req, res) => {
   try {
     const { search } = req.body;
     const games = await Game.find({
-      name: { $regex: `^${search}`, $options: "i" },
+      // name: { $regex: `^${search}`, $options: "i" },
+      name: { $regex: search, $options: "i" },
     })
       .hint({ name: 1 })
-      .limit(24);
+      .limit(20);
     res.status(200).json(games);
   } catch (error) {
     res.status(400);
@@ -32,25 +33,25 @@ const addGame = asyncHandler(async (req, res) => {
       throw new Error("Not valid game");
     }
     const user = await User.findById(req.user._id);
-    const checkgameRating = await GameRating.findOne({
+    const checkGameReview = await GameReview.findOne({
       user: user._id,
       game: _id,
     });
-    if (checkgameRating != null) {
+    if (checkGameReview != null) {
       res.status(401);
-      throw new Error(`Game has already been added ${checkgameRating}`);
+      throw new Error(`Game has already been added ${checkGameReview}`);
     }
-    const gameRating = await GameRating.create({
+    const gameReview = await GameReview.create({
       game: _id,
       user: user._id,
     });
-    await gameRating.save();
-    user.gameRatings.push(gameRating._id);
+    await gameReview.save();
+    user.gameReviews.push(gameReview._id);
     await user.save();
     // const gamedata = gameRating.populate("game");
     // console.log(gameRating);
-    await GameRating.populate(gameRating, "game");
-    res.status(200).json(gameRating);
+    await GameReview.populate(gameReview, "game");
+    res.status(200).json(gameReview);
   } catch (error) {
     res.status(401);
     console.log(error);
@@ -65,15 +66,15 @@ const removeGame = asyncHandler(async (req, res) => {
   try {
     const { _id } = req.body;
     const user = await User.findById(req.user._id);
-    const gameRating = await GameRating.findOne({ game: _id, user: user.id });
-    if (gameRating == null) {
+    const gameReview = await GameReview.findOne({ game: _id, user: user.id });
+    if (gameReview == null) {
       res.status(404);
       throw new Error("game not found");
     }
-    await GameRating.deleteOne({ _id: gameRating.id });
+    await GameReview.deleteOne({ _id: gameReview.id });
     await User.findOneAndUpdate(
       { _id: user.id },
-      { $pull: { gameRatings: gameRating.id } }
+      { $pull: { gameReview: gameReview.id } }
     );
     res.status(200).send({ _id });
   } catch (error) {
@@ -88,15 +89,15 @@ const removeGame = asyncHandler(async (req, res) => {
 const getGame = asyncHandler(async (req, res) => {
   const { _id } = req.params;
   const userId = new mongoose.Types.ObjectId(req.user._id);
-  const gameRating = await GameRating.findOne({
+  const gameReview = await GameReview.findOne({
     game: _id,
     user: userId,
   }).populate("game");
-  if (!gameRating) {
+  if (!gameReview) {
     res.status(404);
     throw new Error("Game has not been added to collection");
   }
-  res.status(200).json(gameRating);
+  res.status(200).json(gameReview);
   // const user = await User.findById(req.user._id);
 });
 
@@ -105,7 +106,7 @@ const getGame = asyncHandler(async (req, res) => {
 //@access Private
 const getAllGames = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id).populate({
-    path: "gameRatings",
+    path: "gameReviews",
     populate: {
       path: "game",
       model: "Game",
@@ -115,8 +116,8 @@ const getAllGames = asyncHandler(async (req, res) => {
     res.status(404);
     throw new Error("User not found");
   }
-  console.log("getting All Games");
-  res.status(200).json(user.gameRatings);
+  // console.log("getting All Games");
+  res.status(200).json(user.gameReviews);
 });
 //@desc   Rate game to ones collection
 //@route  PUT /api/games/rate
@@ -124,33 +125,47 @@ const getAllGames = asyncHandler(async (req, res) => {
 const rateGame = asyncHandler(async (req, res) => {
   try {
     const { _id } = req.body;
-    const { rating } = req.body;
-    const userId = new mongoose.Types.ObjectId(req.user._id);
-    const gameRating = await GameRating.findOne({ game: _id, user: userId });
-    gameRating.rating = rating;
-    await gameRating.save();
-    res.status(200).send(gameRating);
+    let { rating } = req.body;
+    const regex = /^(?!\.)(?:10(?:\.0)?|\d(?:\.\d)?)$/;
+    if (!regex.test(Number(rating))) {
+      res.status(403);
+      throw new Error("Not Valid Input");
+    }
+    if (rating.length === 1 && rating != "0") {
+      rating += ".0";
+    }
+    if (rating.slice(-1) === ".") {
+      rating += "0";
+    }
+
+    // const userId = new mongoose.Types.ObjectId(req.user._id);
+    const gameReview = await GameReview.findOne({ _id: _id });
+    gameReview.rating = rating;
+    await gameReview.save();
+    // res.status(200).send(gameRating);
+    res.status(200).json(gameReview.rating);
   } catch (error) {
+    console.log(error);
     res.status(400);
     throw new Error(`not valid rating`);
   }
 });
 
 //@desc   Remove game to ones collection
-//@route  PUT /api/games/comment
+//@route  PUT /api/games/review
 //@access Private
-const commentGame = asyncHandler(async (req, res) => {
+const reviewGame = asyncHandler(async (req, res) => {
   try {
     const { _id } = req.body;
-    const { comment } = req.body;
+    const { review } = req.body;
     const userId = new mongoose.Types.ObjectId(req.user._id);
-    const gameRating = await GameRating.findOne({ game: _id, user: userId });
-    gameRating.comment = rating;
-    await gameRating.save();
-    res.status(200).send(gameRating);
+    const gameReview = await GameReview.findOne({ _id: _id });
+    gameReview.review = review;
+    await gameReview.save();
+    res.status(200).json(gameReview.review);
   } catch (error) {
     res.status(400);
-    throw new Error(`not valid rating`);
+    throw new Error(`not valid review`);
   }
 });
 
@@ -161,5 +176,5 @@ export {
   getGame,
   getAllGames,
   rateGame,
-  commentGame,
+  reviewGame,
 };

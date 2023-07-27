@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const gameRatingSchema = new mongoose.Schema({
+const gameReviewSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
@@ -12,19 +12,15 @@ const gameRatingSchema = new mongoose.Schema({
     ref: "Game",
   },
   rating: {
-    type: Number,
-    default: null,
-    min: 0,
-    max: 10,
+    type: String,
+    default: "",
   },
-  comment: {
+  review: {
     type: String,
     default: "",
   },
 });
-gameRatingSchema.index({ user: 1 });
-gameRatingSchema.index({ game: 1 });
-
+gameReviewSchema.index({ user: 1 });
 // gameRatingSchema.pre("deleteOne", async function (next) {
 //   const user = await mongoose.model("User").findOne({ gameRatings: this._id });
 //   console.log(user);
@@ -35,5 +31,5 @@ gameRatingSchema.index({ game: 1 });
 //   }
 //   next();
 // });
-const gameRating = mongoose.model("GameRating", gameRatingSchema);
+const gameRating = mongoose.model("GameReview", gameReviewSchema);
 export default gameRating;

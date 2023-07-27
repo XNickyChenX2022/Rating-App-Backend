@@ -7,7 +7,7 @@ import {
   getGame,
   getAllGames,
   rateGame,
-  commentGame,
+  reviewGame,
 } from "../controllers/gameController.js";
 import { protect } from "../middleware/authMiddleware.js";
 router.post("/search", protect, searchGames);
@@ -18,6 +18,6 @@ router
   .post(protect, addGame)
   .delete(protect, removeGame);
 router.put("/rate", protect, rateGame);
-router.put("/comment", protect, commentGame);
+router.put("/review", protect, reviewGame);
 
 export default router;
