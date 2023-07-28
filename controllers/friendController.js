@@ -9,6 +9,12 @@ const sendFriendRequest = AsyncHandler(async (req, res, next) => {
   const { receiverName } = req.body;
   const sender = await User.findById(req.user._id);
   const receiver = await User.findOne({ username: receiverName });
+sender.friends.forEach((friend) => {
+  if (friend.equals(receiver._id)) {
+    res.status(400);
+    throw new Error("Already a friend");
+  }
+});
   if (!sender) {
     res.status(404);
     throw new Error("Not valid sender");
