@@ -32,9 +32,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
   if (userEmailExists != null || usernameExists != null) {
     res.status(401);
-    throw new Error(
-      `Username or email already exists ${(userEmailExists, usernameExists)}`
-    );
+    throw new Error(`Username or email already exists`);
   }
   const user = await User.create({
     username,
@@ -63,7 +61,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     httpOnly: true,
     expires: new Date(0),
   });
-  res.status(200).json({ message: "User Logout User" });
+  res.status(200).json({ message: "Logout User" });
 });
 
 // @desc    Get a new user

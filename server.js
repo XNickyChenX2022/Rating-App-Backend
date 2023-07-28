@@ -8,6 +8,7 @@ import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 import connectDB from "./config/db.js";
 import connectRedis from "./config/client.js";
 import registerWebhooks from "./config/webhook.js";
+import friendRoutes from "./routes/friendRoutes.js";
 import Game from "./models/gameModel.js";
 dotenv.config();
 const port = process.env.PORT || 5000;
@@ -22,7 +23,7 @@ app.use(cookieParser());
 app.use("/api/users", userRoutes);
 app.use("/api/webhooks", webhookRoutes);
 app.use("/api/games", gameRoutes);
-
+app.use("/api/friends", friendRoutes);
 // async function sleep(millis) {
 //   return new Promise((resolve) => setTimeout(resolve, millis));
 // }

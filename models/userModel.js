@@ -17,6 +17,9 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
     gameReviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "GameReview" }],
+    friends: [
+      { type: mongoose.Schema.Types.ObjectId, ref: "User", unique: true },
+    ],
   },
   {
     timestamps: true,
