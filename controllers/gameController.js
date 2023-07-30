@@ -69,27 +69,27 @@ const removeGame = asyncHandler(async (req, res) => {
     { _id: user.id },
     { $pull: { gameReview: gameReview.id } }
   );
-  res.status(200).send({ _id });
+  res.status(200).json({ _id: _id });
 });
 
-// @desc   Get one game one's collection
-// @route  GET /api/games/:_id
-// @access Private
-const getGame = asyncHandler(async (req, res) => {
-  const { _id } = req.params;
-  const userId = new mongoose.Types.ObjectId(req.user._id);
-  const gameReview = await GameReview.findOne({
-    game: _id,
-    user: userId,
-  }).populate("game");
-  if (!gameReview) {
-    res.status(404);
-    throw new Error("Game has not been added to collection");
-  } else {
-    res.status(200).json(gameReview);
-  }
-  // const user = await User.findById(req.user._id);
-});
+// // @desc   Get one game one's collection
+// // @route  GET /api/games/:_id
+// // @access Private
+// const getGame = asyncHandler(async (req, res) => {
+//   const { _id } = req.params;
+//   const userId = new mongoose.Types.ObjectId(req.user._id);
+//   const gameReview = await GameReview.findOne({
+//     game: _id,
+//     user: userId,
+//   }).populate("game");
+//   if (!gameReview) {
+//     res.status(404);
+//     throw new Error("Game has not been added to collection");
+//   } else {
+//     res.status(200).json(gameReview);
+//   }
+//   // const user = await User.findById(req.user._id);
+// });
 
 //@desc   Get all games from one's collection
 //@route  GET /api/games
@@ -102,7 +102,6 @@ const getAllGames = asyncHandler(async (req, res) => {
       model: "Game",
     },
   });
-  // console.log("getting All Games");
   res.status(200).json(user.gameReviews);
 });
 //@desc   Rate game to ones collection
@@ -116,7 +115,7 @@ const rateGame = asyncHandler(async (req, res) => {
     res.status(403);
     throw new Error("Not valid rating");
   } else {
-    if (rating.length === 1 && rating != "0") {
+    if (rating.indexOf(".") === -1) {
       rating += ".0";
     }
     if (rating.slice(-1) === ".") {
@@ -153,7 +152,7 @@ export {
   searchGames,
   addGame,
   removeGame,
-  getGame,
+  // getGame,
   getAllGames,
   rateGame,
   reviewGame,

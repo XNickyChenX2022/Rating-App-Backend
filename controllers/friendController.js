@@ -1,32 +1,33 @@
 import AsyncHandler from "express-async-handler";
 import FriendRequest from "../models/friendRequestModel.js";
 import User from "../models/userModel.js";
+import mongoose from "mongoose";
 
 //@desc     Send Friend Request
 //@route    POST /api/friends
 //@route    private
-const sendFriendRequest = AsyncHandler(async (req, res, next) => {
+const sendFriendRequest = AsyncHandler(async (req, res) => {
   const { receiverName } = req.body;
   const sender = await User.findById(req.user._id);
   const receiver = await User.findOne({ username: receiverName });
-sender.friends.forEach((friend) => {
-  if (friend.equals(receiver._id)) {
-    res.status(400);
-    throw new Error("Already a friend");
-  }
-});
+  sender.friends.forEach((friend) => {
+    if (friend.equals(receiver._id)) {
+      res.status(400);
+      throw new Error("Already a friend");
+    }
+  });
   if (!sender) {
     res.status(404);
     throw new Error("Not valid sender");
   } else if (!receiver) {
     res.status(404);
-    throw new Error("The user your sending to does not exists");
+    throw new Error("The user you're sending to does not exist");
   } else {
     await FriendRequest.create({
       sender: sender._id,
       receiver: receiver._id,
     });
-    res.status(200).send(`Friend request sent to ${receiverName}`);
+    res.status(200).json({ message: `Friend request sent to ${receiverName}` });
   }
 });
 
@@ -35,7 +36,6 @@ sender.friends.forEach((friend) => {
 //@access   private
 const respondFriendRequest = AsyncHandler(async (req, res) => {
   const { response, senderUsername } = req.body;
-  console.log(response);
   const receiver = await User.findById(req.user._id);
   const sender = await User.findOne({ username: senderUsername });
   if (!sender) {
@@ -46,7 +46,6 @@ const respondFriendRequest = AsyncHandler(async (req, res) => {
     sender: sender._id,
     receiver: receiver._id,
   });
-  console.log(friendRequest);
   if (!friendRequest) {
     res.status(400);
     throw new Error("Friend Request does not exists");
@@ -57,7 +56,7 @@ const respondFriendRequest = AsyncHandler(async (req, res) => {
       receiver.save();
       sender.save();
       await FriendRequest.deleteOne({ _id: friendRequest._id });
-      res.status(200).send({ message: "Successfully added friend" });
+      res.status(200).json(sender);
     } else {
       await FriendRequest.deleteOne({ _id: friendRequest._id });
       res.status(200).json({ message: "Cancelled friend request" });
@@ -65,8 +64,19 @@ const respondFriendRequest = AsyncHandler(async (req, res) => {
   }
 });
 
+//@desc       Get a list of all friend requests sent to you
+//@route      GET /api/friends/requests
+//@access     Private
+const getAllFriendRequests = AsyncHandler(async (req, res) => {
+  const userId = new mongoose.Types.ObjectId(req.user._id);
+  const friendRequests = await FriendRequest.find({
+    receiver: userId,
+  }).populate({ path: "sender", select: "username" });
+  res.status(200).send(friendRequests);
+});
+
 //@desc       Get a list of all your friends
-//@route      GET /api/friends
+//@route      GET /api/friends/
 //@access     Private
 const getAllFriends = AsyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
@@ -74,4 +84,27 @@ const getAllFriends = AsyncHandler(async (req, res) => {
   res.status(200).json(user.friends);
 });
 
-export { sendFriendRequest, respondFriendRequest, getAllFriends };
+//@desc       Get a list of a friend's game
+//@route      GET /api/friends/:username
+//@access     Private
+const getFriendGames = AsyncHandler(async (req, res) => {
+  const { username } = req.params;
+  const user = await User.findOne({ username: username }).populate({
+    path: "gameReviews",
+    populate: {
+      path: "game",
+      model: "Game",
+    },
+  });
+  res
+    .status(200)
+    .json({ username: user.username, gameReviews: user.gameReviews });
+});
+
+export {
+  sendFriendRequest,
+  respondFriendRequest,
+  getAllFriendRequests,
+  getAllFriends,
+  getFriendGames,
+};

@@ -4,14 +4,12 @@ import {
   searchGames,
   addGame,
   removeGame,
-  getGame,
   getAllGames,
   rateGame,
   reviewGame,
 } from "../controllers/gameController.js";
 import { protect } from "../middleware/authMiddleware.js";
 router.post("/search", protect, searchGames);
-router.get("/:_id", protect, getGame);
 router
   .route("/")
   .get(protect, getAllGames)
