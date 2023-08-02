@@ -18,6 +18,12 @@ const GameSchema = new mongoose.Schema({
       name: String,
     },
   ],
+  genres: [
+    {
+      id: Number,
+      name: String,
+    },
+  ],
   involved_companies: [
     {
       id: Number,

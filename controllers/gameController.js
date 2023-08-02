@@ -2,7 +2,7 @@ import asyncHandler from "express-async-handler";
 import Game from "../models/gameModel.js";
 import User from "../models/userModel.js";
 import GameReview from "../models/gameReviewModel.js";
-import mongoose from "mongoose";
+
 //@desc   Search database for games
 //@route  POST /api/games/search
 //@access Private
@@ -44,11 +44,8 @@ const addGame = asyncHandler(async (req, res) => {
     game: _id,
     user: user._id,
   });
-  // await gameReview.save();
   user.gameReviews.push(gameReview._id);
   await user.save();
-  // const gamedata = gameRating.populate("game");
-  // console.log(gameRating);
   await GameReview.populate(gameReview, "game");
   res.status(200).json(gameReview);
 });
@@ -71,25 +68,6 @@ const removeGame = asyncHandler(async (req, res) => {
   );
   res.status(200).json({ _id: _id });
 });
-
-// // @desc   Get one game one's collection
-// // @route  GET /api/games/:_id
-// // @access Private
-// const getGame = asyncHandler(async (req, res) => {
-//   const { _id } = req.params;
-//   const userId = new mongoose.Types.ObjectId(req.user._id);
-//   const gameReview = await GameReview.findOne({
-//     game: _id,
-//     user: userId,
-//   }).populate("game");
-//   if (!gameReview) {
-//     res.status(404);
-//     throw new Error("Game has not been added to collection");
-//   } else {
-//     res.status(200).json(gameReview);
-//   }
-//   // const user = await User.findById(req.user._id);
-// });
 
 //@desc   Get all games from one's collection
 //@route  GET /api/games
@@ -121,20 +99,17 @@ const rateGame = asyncHandler(async (req, res) => {
     if (rating.slice(-1) === ".") {
       rating += "0";
     }
-
-    // const userId = new mongoose.Types.ObjectId(req.user._id);
     const gameReview = await GameReview.findOne({ _id: _id });
     if (!gameReview) {
       throw new Error("Game not added to collection");
     }
     gameReview.rating = rating;
     await gameReview.save();
-    // res.status(200).send(gameRating);
     res.status(200).json(gameReview.rating);
   }
 });
 
-//@desc   Remove game to ones collection
+//@desc   Review game from one's collection
 //@route  PUT /api/games/review
 //@access Private
 const reviewGame = asyncHandler(async (req, res) => {
@@ -148,12 +123,4 @@ const reviewGame = asyncHandler(async (req, res) => {
   res.status(200).json(gameReview.review);
 });
 
-export {
-  searchGames,
-  addGame,
-  removeGame,
-  // getGame,
-  getAllGames,
-  rateGame,
-  reviewGame,
-};
+export { searchGames, addGame, removeGame, getAllGames, rateGame, reviewGame };

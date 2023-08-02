@@ -27,7 +27,6 @@ friendRequestSchema.pre("save", async function (next) {
     receiver: this.sender,
   });
   if (checkFriendRequest) {
-    // return Error("Can Not Send a Request to Yourself");
     next(
       new Error(
         "A friend request has already been sent to you. Please check your pending friend requests"
@@ -43,7 +42,5 @@ friendRequestSchema.pre("save", async function (next) {
   }
   next();
 });
-
-// friendRequestSchema.index({ sender: 1, receiver: 1 }, { unique: true });
 const FriendRequest = mongoose.model("FriendRequest", friendRequestSchema);
 export default FriendRequest;

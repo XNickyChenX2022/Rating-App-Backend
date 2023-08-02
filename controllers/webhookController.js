@@ -10,15 +10,15 @@ const createGames = asyncHandler(async (req, res) => {
       "Client-ID": process.env.CLIENT_ID,
       Authorization: "Bearer " + process.env.access_token,
     },
-    body: `fields name, cover.image_id, platforms.name, category, remakes.name, remasters.name, dlcs.name, expansions.name, involved_companies.company.name; where category = (0) & version_parent = null & cover.image_id != null & involved_companies.company.name != null & id=${id};  `,
+    body: `fields name, cover.image_id, platforms.name, genres.name, category, remakes.name, remasters.name, dlcs.name, expansions.name, involved_companies.company.name, involved_companies.publisher, involved_companies.developer;  where category = (0) & version_parent = null & cover.image_id != null & involved_companies.company.name != null & id=${id};`,
   });
   const games = await response.json();
   console.log(games);
   if (games.length == 0) {
     res.status(200).send("OK");
   } else {
-    console.log("creating new games");
     const game = games[0];
+    console.log(`creating new games - ${game.name}`);
     await Game.create({
       _id: game.id,
       cover: game.cover,
@@ -43,14 +43,14 @@ const updateGames = asyncHandler(async (req, res) => {
       "Client-ID": process.env.CLIENT_ID,
       Authorization: "Bearer " + process.env.access_token,
     },
-    body: `fields name, cover.image_id, platforms.name, category, remakes.name, remasters.name, dlcs.name, expansions.name, involved_companies.company.name, involved_companies.publisher, involved_companies.developer;  where category = (0) & version_parent = null & cover.image_id != null & involved_companies.company.name != null & id=${id};  `,
+    body: `fields name, cover.image_id, platforms.name, genres.name, category, remakes.name, remasters.name, dlcs.name, expansions.name, involved_companies.company.name, involved_companies.publisher, involved_companies.developer;  where category = (0) & version_parent = null & cover.image_id != null & involved_companies.company.name != null & id=${id};  `,
   });
   const games = await response.json();
   if (games.length == 0) {
-    res.status(200).send("OK");
+    res.status(200).send("No game needed to be updated");
   } else {
-    console.log("updating games");
     const game = games[0];
+    console.log(`updating games - ${game.name}`);
     await Game.findOneAndUpdate(
       { id },
       {
@@ -65,7 +65,7 @@ const updateGames = asyncHandler(async (req, res) => {
         remasters: game.remasters,
       }
     );
-    res.status(200).send("OK");
+    res.status(200).json(game.name);
   }
 });
 

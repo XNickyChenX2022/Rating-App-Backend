@@ -8,8 +8,10 @@ const connectRedis = async () => {
   });
   // Connect to redis server
   console.log("connecting");
-  redisClient.on("error", (error) => console.error(`Error: in connection`));
-  await redisClient.connect().then(async (res) => {
+  redisClient.on("error", (error) =>
+    console.error(`Error: in connection: ${error}`)
+  );
+  await redisClient.connect().then(async () => {
     new maintainTokens(redisClient);
   });
 };
