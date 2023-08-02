@@ -9,7 +9,6 @@ import connectDB from "./config/db.js";
 import connectRedis from "./config/client.js";
 import registerWebhooks from "./config/webhook.js";
 import friendRoutes from "./routes/friendRoutes.js";
-import Game from "./models/gameModel.js";
 dotenv.config();
 const port = process.env.PORT || 5000;
 
