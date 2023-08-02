@@ -9,6 +9,7 @@ import connectDB from "./config/db.js";
 import connectRedis from "./config/client.js";
 import registerWebhooks from "./config/webhook.js";
 import friendRoutes from "./routes/friendRoutes.js";
+import cors from "cors";
 dotenv.config();
 const port = process.env.PORT || 5000;
 
@@ -19,6 +20,12 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(
+  cors({
+    origin: process.env.frontend_url,
+    credentials: true,
+  })
+);
 app.use("/api/users", userRoutes);
 app.use("/api/webhooks", webhookRoutes);
 app.use("/api/games", gameRoutes);
