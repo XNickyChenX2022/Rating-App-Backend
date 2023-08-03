@@ -22,7 +22,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 console.log(`Using Cors for ${process.env.FRONTEND_URL}`);
 app.use(cors({ origin: `*`, credentials: true }));
-app.options(process.env.FRONTEND_URL, cors());
+app.options(
+  [process.env.FRONTEND_URL, "http://localhost:3000/MyGamesCollection/"],
+  cors()
+);
 app.use("/api/users", userRoutes);
 app.use("/api/webhooks", webhookRoutes);
 app.use("/api/games", gameRoutes);
