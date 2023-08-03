@@ -22,7 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "https://xnickychenx2022.github.io/MyGamesCollection/",
+    origin: "https://xnickychenx2022.github.io",
     credentials: true,
   })
 );
