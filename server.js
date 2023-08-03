@@ -10,7 +10,6 @@ import connectRedis from "./config/client.js";
 import registerWebhooks from "./config/webhook.js";
 import friendRoutes from "./routes/friendRoutes.js";
 import cors from "cors";
-import { corsOptionsCheck } from "./config/corsCheck.js";
 dotenv.config();
 const port = process.env.PORT || 5000;
 
