@@ -21,7 +21,7 @@ This is the backend repository for MyGamesCollection. To view the the frontend a
     *  retrieve all games from one's collection
     *  rate a game (uses regex to insert valid numbers)
     *  inserts and updates the review on a game 
-  *  friend-related functionalities
-    *   sending friend request
-    *   accepting/rejecting friend requests
-    *   retrieving friends list and friend's list of games 
+  * friend-related functionalities
+    *  sending friend request
+    *  accepting/rejecting friend requests
+    *  retrieving friends list and friend's list of games 
