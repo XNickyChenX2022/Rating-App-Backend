@@ -1,6 +1,7 @@
 ﻿# Rating-App-Backend
 # I. Background
-This is the backend repository for MyGamesCollection. To view the the frontend and the background regarding this project, please visit: https://github.com/XNickyChenX2022/MyGamesCollection  
+This is the backend repository for MyGamesCollection.   
+To view the the frontend and the background regarding this project, please visit: https://github.com/XNickyChenX2022/MyGamesCollection  
 For the website, use this link:https://xnickychenx2022.github.io/MyGamesCollection
 # II. Backend
 * implemented jwt for user authentication
