@@ -5,7 +5,7 @@ To view the the frontend and the background regarding this project, please visit
 For the website, use this link:https://xnickychenx2022.github.io/MyGamesCollection
 # II. Backend
 * implemented jwt for user authentication
-* scraped the IGDB api for over 80,000 games to be stored in MongoDB
+* scraped the IGDB api for over 70,000 games to be stored in MongoDB
 * implemented webhooks to continually update and add new games
 * implemented redis for storing access tokens that are necessary for accessing the IGDB api
 * set up webhooks to have the MongoDB database stay up to date with new available games/dlcs/etc...
