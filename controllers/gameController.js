@@ -7,20 +7,21 @@ import { connectRedis } from "../config/client.js";
 
 // let client = connectRedis();
 
-const updateRedisCache = async (req, res) => {
+const updateRedisCache = async (_id, gameReview, req) => {
   let client = connectRedis();
-  const user = await User.findById(req.user._id).populate({
-    path: "gameReviews",
-    populate: {
-      path: "game",
-      model: "Game",
-    },
-  });
-  const gameReviews = user.gameReviews;
+  // const user = await User.findById(req.user._id).populate({
+  //   path: "gameReviews",
+  //   populate: {
+  //     path: "game",
+  //     model: "Game",
+  //   },
+  // });
+  // const gameReviews = user.gameReviews;
+  console.log(req.user._id.toString(), _id.toString());
   await client.hSet(
-    `user:${req.user._id}:gameReviews`,
-    "reviews",
-    JSON.stringify(gameReviews)
+    `user:${req.user._id.toString()}:gameReviews`,
+    _id.toString(),
+    JSON.stringify(gameReview)
   );
 };
 
@@ -69,7 +70,7 @@ const addGame = asyncHandler(async (req, res) => {
   await user.save();
   await GameReview.populate(gameReview, "game");
 
-  updateRedisCache(req, res);
+  updateRedisCache(gameReview._id, gameReview, req);
   res.status(200).json(gameReview);
 });
 
@@ -77,6 +78,7 @@ const addGame = asyncHandler(async (req, res) => {
 //@route  DELETE /api/games
 //@access Private
 const removeGame = asyncHandler(async (req, res) => {
+  let client = connectRedis();
   const { _id } = req.body;
   const user = await User.findById(req.user._id);
   const gameReview = await GameReview.findOne({ game: _id, user: user.id });
@@ -89,7 +91,7 @@ const removeGame = asyncHandler(async (req, res) => {
     { _id: user.id },
     { $pull: { gameReview: gameReview.id } }
   );
-  updateRedisCache(req, res);
+  await client.hDel(`user:${req.user._id}:gameReviews`, gameReview.id);
   res.status(200).json({ _id: _id });
 });
 
@@ -99,33 +101,33 @@ const removeGame = asyncHandler(async (req, res) => {
 
 const getAllGames = asyncHandler(async (req, res) => {
   let client = connectRedis();
-  let cachedData = await client.hGet(
-    `user:${req.user._id}:gameReviews`,
-    "reviews");
-  if (cachedData) {
-          res.status(200).json(JSON.parse(cachedData));
+  let cachedData = await client.hGetAll(`user:${req.user._id}:gameReviews`);
+  if (cachedData && cachedData && Object.keys(cachedData).length > 0) {
+    const jsonArray = Object.values(cachedData).map((jsonString) =>
+      JSON.parse(jsonString)
+    );
+    res.status(200).json(jsonArray);
   } else {
-          try {
-            const user = await User.findById(req.user._id).populate({
-              path: "gameReviews",
-              populate: {
-                path: "game",
-                model: "Game",
-              },
-            });
-            client.hSet(
-              `user:${req.user._id}:gameReviews`,
-              "reviews",
-              JSON.stringify(user.gameReviews)
-            );
-            res.status(200).json(user.gameReviews);
-          } catch (error) {
-            res.status(500).json({ error: "Internal Server Error" });
-          }
-        }
-      
-  
+    try {
+      const user = await User.findById(req.user._id).populate({
+        path: "gameReviews",
+        populate: {
+          path: "game",
+          model: "Game",
+        },
+      });
+      // client.hSet(
+      //   `user:${req.user._id}:gameReviews`,
+      //   "reviews",
+      //   JSON.stringify(user.gameReviews)
+      // );
+      res.status(200).json(user.gameReviews);
+    } catch (error) {
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
 });
+
 //@desc   Rate game to ones collection
 //@route  PUT /api/games/rate
 //@access Private
@@ -144,12 +146,13 @@ const rateGame = asyncHandler(async (req, res) => {
       rating += "0";
     }
     const gameReview = await GameReview.findOne({ _id: _id });
+    await GameReview.populate(gameReview, "game");
     if (!gameReview) {
       throw new Error("Game not added to collection");
     }
     gameReview.rating = rating;
     await gameReview.save();
-    updateRedisCache();
+    updateRedisCache(gameReview._id, gameReview, req);
     res.status(200).json(gameReview.rating);
   }
 });
@@ -164,8 +167,10 @@ const reviewGame = asyncHandler(async (req, res) => {
     throw new Error("Game not added to collection");
   }
   gameReview.review = review;
+  await GameReview.populate(gameReview, "game");
   await gameReview.save();
-  updateRedisCache(req, res);
+  updateRedisCache(gameReview._id, gameReview, req);
+  console.log(gameReview);
   res.status(200).json(gameReview.review);
 });
 
