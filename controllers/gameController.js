@@ -5,10 +5,9 @@ import GameReview from "../models/gameReviewModel.js";
 // import { redisClient } from "../config/webhook.js";
 import { connectRedis } from "../config/client.js";
 
-// let client = connectRedis();
+let client = connectRedis();
 
 const updateRedisCache = async (_id, gameReview, req) => {
-  let client = connectRedis();
   // const user = await User.findById(req.user._id).populate({
   //   path: "gameReviews",
   //   populate: {
@@ -78,7 +77,6 @@ const addGame = asyncHandler(async (req, res) => {
 //@route  DELETE /api/games
 //@access Private
 const removeGame = asyncHandler(async (req, res) => {
-  let client = connectRedis();
   const { _id } = req.body;
   const user = await User.findById(req.user._id);
   const gameReview = await GameReview.findOne({ game: _id, user: user.id });
@@ -100,7 +98,6 @@ const removeGame = asyncHandler(async (req, res) => {
 //@access Private
 
 const getAllGames = asyncHandler(async (req, res) => {
-  let client = connectRedis();
   let cachedData = await client.hGetAll(`user:${req.user._id}:gameReviews`);
   if (cachedData && cachedData && Object.keys(cachedData).length > 0) {
     const jsonArray = Object.values(cachedData).map((jsonString) =>
