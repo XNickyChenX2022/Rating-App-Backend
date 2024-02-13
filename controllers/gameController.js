@@ -2,6 +2,27 @@ import asyncHandler from "express-async-handler";
 import Game from "../models/gameModel.js";
 import User from "../models/userModel.js";
 import GameReview from "../models/gameReviewModel.js";
+// import { redisClient } from "../config/webhook.js";
+import { connectRedis } from "../config/client.js";
+
+// let client = connectRedis();
+
+const updateRedisCache = async (req, res) => {
+  let client = connectRedis();
+  const user = await User.findById(req.user._id).populate({
+    path: "gameReviews",
+    populate: {
+      path: "game",
+      model: "Game",
+    },
+  });
+  const gameReviews = user.gameReviews;
+  await client.hSet(
+    `user:${req.user._id}:gameReviews`,
+    "reviews",
+    JSON.stringify(gameReviews)
+  );
+};
 
 //@desc   Search database for games
 //@route  POST /api/games/search
@@ -47,6 +68,8 @@ const addGame = asyncHandler(async (req, res) => {
   user.gameReviews.push(gameReview._id);
   await user.save();
   await GameReview.populate(gameReview, "game");
+
+  updateRedisCache(req, res);
   res.status(200).json(gameReview);
 });
 
@@ -66,21 +89,42 @@ const removeGame = asyncHandler(async (req, res) => {
     { _id: user.id },
     { $pull: { gameReview: gameReview.id } }
   );
+  updateRedisCache(req, res);
   res.status(200).json({ _id: _id });
 });
 
 //@desc   Get all games from one's collection
 //@route  GET /api/games
 //@access Private
+
 const getAllGames = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.user._id).populate({
-    path: "gameReviews",
-    populate: {
-      path: "game",
-      model: "Game",
-    },
-  });
-  res.status(200).json(user.gameReviews);
+  let client = connectRedis();
+  let cachedData = await client.hGet(
+    `user:${req.user._id}:gameReviews`,
+    "reviews");
+  if (cachedData) {
+          res.status(200).json(JSON.parse(cachedData));
+  } else {
+          try {
+            const user = await User.findById(req.user._id).populate({
+              path: "gameReviews",
+              populate: {
+                path: "game",
+                model: "Game",
+              },
+            });
+            client.hSet(
+              `user:${req.user._id}:gameReviews`,
+              "reviews",
+              JSON.stringify(user.gameReviews)
+            );
+            res.status(200).json(user.gameReviews);
+          } catch (error) {
+            res.status(500).json({ error: "Internal Server Error" });
+          }
+        }
+      
+  
 });
 //@desc   Rate game to ones collection
 //@route  PUT /api/games/rate
@@ -105,6 +149,7 @@ const rateGame = asyncHandler(async (req, res) => {
     }
     gameReview.rating = rating;
     await gameReview.save();
+    updateRedisCache();
     res.status(200).json(gameReview.rating);
   }
 });
@@ -120,6 +165,7 @@ const reviewGame = asyncHandler(async (req, res) => {
   }
   gameReview.review = review;
   await gameReview.save();
+  updateRedisCache(req, res);
   res.status(200).json(gameReview.review);
 });
 
