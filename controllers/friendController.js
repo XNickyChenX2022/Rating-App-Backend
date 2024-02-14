@@ -2,7 +2,8 @@ import AsyncHandler from "express-async-handler";
 import FriendRequest from "../models/friendRequestModel.js";
 import User from "../models/userModel.js";
 import mongoose from "mongoose";
-
+import { connectRedis } from "../config/client.js";
+let client = connectRedis();
 //@desc     Send Friend Request
 //@route    POST /api/friends
 //@route    private
@@ -89,16 +90,31 @@ const getAllFriends = AsyncHandler(async (req, res) => {
 //@access     Private
 const getFriendGames = AsyncHandler(async (req, res) => {
   const { username } = req.params;
-  const user = await User.findOne({ username: username }).populate({
-    path: "gameReviews",
-    populate: {
-      path: "game",
-      model: "Game",
-    },
-  });
-  res
-    .status(200)
-    .json({ username: user.username, gameReviews: user.gameReviews });
+  console.log(username);
+  const user = await User.findOne({ username: "testtest" });
+  console.log(user);
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
+  }
+  let cachedData = await client.hGetAll(`user:${user._id}:gameReviews`);
+  if (cachedData && cachedData && Object.keys(cachedData).length > 0) {
+    const jsonArray = Object.values(cachedData).map((jsonString) =>
+      JSON.parse(jsonString)
+    );
+    res.status(200).json(jsonArray);
+  } else {
+    const user = await User.findOne({ username: username }).populate({
+      path: "gameReviews",
+      populate: {
+        path: "game",
+        model: "Game",
+      },
+    });
+    res
+      .status(200)
+      .json({ username: user.username, gameReviews: user.gameReviews });
+  }
 });
 
 export {

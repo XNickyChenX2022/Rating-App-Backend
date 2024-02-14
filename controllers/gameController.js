@@ -95,7 +95,7 @@ const removeGame = asyncHandler(async (req, res) => {
 
 //@desc   Get all games from one's collection
 //@route  GET /api/games
-//@access Private
+//@access PrivateUs
 
 const getAllGames = asyncHandler(async (req, res) => {
   let cachedData = await client.hGetAll(`user:${req.user._id}:gameReviews`);
