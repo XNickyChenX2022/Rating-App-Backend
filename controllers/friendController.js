@@ -96,7 +96,7 @@ const getFriendGames = AsyncHandler(async (req, res) => {
     throw new Error("User not found");
   }
   let cachedData = await client.hGetAll(`user:${user._id}:gameReviews`);
-  if (cachedData && cachedData && Object.keys(cachedData).length > 0) {
+  if (cachedData && Object.keys(cachedData).length > 0) {
     const jsonArray = Object.values(cachedData).map((jsonString) =>
       JSON.parse(jsonString)
     );
