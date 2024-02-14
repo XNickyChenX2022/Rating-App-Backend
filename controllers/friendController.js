@@ -90,9 +90,7 @@ const getAllFriends = AsyncHandler(async (req, res) => {
 //@access     Private
 const getFriendGames = AsyncHandler(async (req, res) => {
   const { username } = req.params;
-  console.log(username);
-  const user = await User.findOne({ username: "testtest" });
-  console.log(user);
+  const user = await User.findOne({ username: username });
   if (!user) {
     res.status(404);
     throw new Error("User not found");
